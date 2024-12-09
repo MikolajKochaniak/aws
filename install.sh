@@ -9,6 +9,7 @@ VERSION=main
 
 APP_USERNAME=ecommerce
 APP_DEST=/opt/ecommerce
+APP_NAME=ecommerce
 
 echo "Hello ${NAME}"
 
@@ -35,3 +36,24 @@ rm -rf ${TMP_DEST}
 
 
 echo "java -jar -Dserver.port=8080 /opt/ecommerce/app.jar"
+
+systemd_template="""
+[Unit]
+Description=My ${APP_NAME}
+fter=network-online.target
+
+[Service]
+Type=simple
+User=${APP_USERNAME}
+ExecStart=java -jar -Dserver.port=${APP_PORT} ${APP_DEST}/app.jar
+Restart=always
+
+[Install]
+antedBy=multi-user.target
+"""
+echo "$systemd_template" > /etc/systemd/system/${APP_NAME}.service
+systemctl deamon-reload
+systemctl enable ${APP_NAME}
+systemctl restart ${APP_NAME}
+
+echo "it works"
